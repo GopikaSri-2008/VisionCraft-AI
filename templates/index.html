@@ -1,1 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
 
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VisionCraft AI</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="header">
+
+            <div class="logo">
+                🎨 VisionCraft AI
+            </div>
+
+            <div class="tagline">
+                Create Your Imagination
+            </div>
+
+        </header>
+
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <section class="hero">
+
+                <h1>
+                    Turn Your Ideas Into Images
+                </h1>
+
+                <p>
+                    Describe your imagination and create beautiful
+                    AI-generated images.
+                </p>
+
+            </section>
+
+
+            <!-- PROMPT CARD -->
+            <section class="generator-card">
+
+                <label for="prompt">
+                    ✨ Describe your image
+                </label>
+
+                <textarea
+                    id="prompt"
+                    name="prompt"
+                    placeholder="Example: A beautiful sunset over a peaceful mountain..."
+                    rows="5"></textarea>
+
+                <button
+                    type="button"
+                    class="generate-btn"
+                    onclick="generateImage()">
+
+                    ✨ Generate Image
+
+                </button>
+
+            </section>
+
+
+            <!-- LOADING -->
+            <div id="loading" class="loading">
+
+                <div class="spinner"></div>
+
+                <p>
+                    Creating your image...
+                </p>
+
+            </div>
+
+
+            <!-- IMAGE RESULT -->
+            <section class="result-card">
+
+                <h2>
+                    🖼️ Generated Image
+                </h2>
+
+                <div id="image-container"
+                     class="image-container">
+
+                    <div class="placeholder">
+
+                        <span>🎨</span>
+
+                        <p>
+                            Your generated image will appear here
+                        </p>
+
+                    </div>
+
+                </div>
+
+                <button
+                    id="download-btn"
+                    class="download-btn"
+                    style="display: none;"
+                    onclick="downloadImage()">
+
+                    ⬇️ Download Image
+
+                </button>
+
+            </section>
+
+        </main>
+
+
+        <!-- FOOTER -->
+        <footer class="footer">
+
+            <p>
+                © 2026 VisionCraft AI
+            </p>
+
+        </footer>
+
+    </div>
+
+
+    <script>
+
+        async function generateImage() {
+
+            const prompt =
+                document.getElementById("prompt").value.trim();
+
+            if (!prompt) {
+
+                alert("Please enter an image description.");
+
+                return;
+            }
+
+            const loading =
+                document.getElementById("loading");
+
+            const imageContainer =
+                document.getElementById("image-container");
+
+            const downloadButton =
+                document.getElementById("download-btn");
+
+
+            loading.style.display = "block";
+
+            downloadButton.style.display = "none";
+
+
+            imageContainer.innerHTML = `
+                <div class="placeholder">
+                    <span>✨</span>
+                    <p>Generating your image...</p>
+                </div>
+            `;
+
+
+            try {
+
+                const response =
+                    await fetch("/generate", {
+
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            prompt: prompt
+                        })
+
+                    });
+
+
+                const data =
+                    await response.json();
+
+
+                if (!response.ok) {
+
+                    throw new Error(
+                        data.error || "Image generation failed."
+                    );
+
+                }
+
+
+                imageContainer.innerHTML = `
+                    <img
+                        id="generated-image"
+                        src="${data.image}"
+                        alt="Generated Image">
+                `;
+
+
+                downloadButton.style.display = "block";
+
+
+            } catch (error) {
+
+                imageContainer.innerHTML = `
+                    <div class="placeholder error">
+                        <span>⚠️</span>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+
+            } finally {
+
+                loading.style.display = "none";
+
+            }
+
+        }
+
+
+        function downloadImage() {
+
+            const image =
+                document.getElementById("generated-image");
+
+            if (!image) {
+                return;
+            }
+
+            const link =
+                document.createElement("a");
+
+            link.href = image.src;
+
+            link.download =
+                "visioncraft-generated-image.png";
+
+            link.click();
+
+        }
+
+    </script>
+
+</body>
+
+</html>
